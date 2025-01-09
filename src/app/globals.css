@@ -5,13 +5,23 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --foreground-secondary: #666666;
+  --card-bg: #ffffff;
+  --secondary-bg: #f9fafb;
+  --accent-bg: #dbeafe;
+  --accent-hover: #bfdbfe;
+  --border-color: #e5e7eb;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+[data-theme='dark'] {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --foreground-secondary: #a0a0a0;
+  --card-bg: #1f2937;
+  --secondary-bg: #111827;
+  --accent-bg: #1e3a8a;
+  --accent-hover: #1e40af;
+  --border-color: #374151;
 }
 
 body {
