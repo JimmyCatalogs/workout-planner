@@ -28,7 +28,7 @@ const DragDropWrapper = ({ children, onDrop, onDragOver, day, exercises, setsPer
 
   if (!isMounted) {
     return (
-      <div className={`h-[384px] border-2 rounded-lg bg-[var(--card-bg)] shadow-sm ${
+      <div className={`h-[300px] md:h-[384px] border-2 rounded-lg bg-[var(--card-bg)] shadow-sm ${
         isGoalReached ? 'border-green-500' : 'border-[var(--border-color)]'
       }`}>
         {children}
@@ -38,7 +38,7 @@ const DragDropWrapper = ({ children, onDrop, onDragOver, day, exercises, setsPer
 
   return (
     <div
-      className={`h-[384px] border-2 rounded-lg bg-[var(--card-bg)] shadow-sm ${
+      className={`h-[300px] md:h-[384px] border-2 rounded-lg bg-[var(--card-bg)] shadow-sm ${
         isGoalReached ? 'border-green-500' : 'border-[var(--border-color)]'
       }`}
       onDrop={onDrop}
@@ -48,7 +48,7 @@ const DragDropWrapper = ({ children, onDrop, onDragOver, day, exercises, setsPer
         <h3 className="font-semibold text-[var(--foreground)]">{day}</h3>
         <span className="text-sm text-[var(--foreground)]">{totalSets} sets</span>
       </div>
-      <div className="overflow-y-auto h-[332px]">
+      <div className="overflow-y-auto h-[248px] md:h-[332px]">
         {children}
       </div>
     </div>
@@ -151,12 +151,12 @@ const WorkoutPlanner = () => {
 
   return (
     <div className="h-screen bg-[var(--background)]">
-      <nav className="bg-[var(--card-bg)] border-b border-[var(--border-color)] px-4 py-3">
+      <nav className="bg-[var(--card-bg)] border-b border-[var(--border-color)] px-2 md:px-4 py-3">
         <div className="flex justify-between items-center">
-          <div className="flex gap-4">
+          <div className="flex gap-2 md:gap-4">
             <button
               onClick={() => setActiveTab('planner')}
-              className={`px-4 py-2 rounded-lg transition-colors ${
+              className={`px-2 md:px-4 py-2 rounded-lg transition-colors text-sm md:text-base ${
                 activeTab === 'planner'
                   ? 'bg-[var(--accent-bg)] text-[var(--foreground)]'
                   : 'hover:bg-[var(--secondary-bg)] text-[var(--foreground-secondary)]'
@@ -166,7 +166,7 @@ const WorkoutPlanner = () => {
             </button>
             <button
               onClick={() => setActiveTab('goals')}
-              className={`px-4 py-2 rounded-lg transition-colors ${
+              className={`px-2 md:px-4 py-2 rounded-lg transition-colors text-sm md:text-base ${
                 activeTab === 'goals'
                   ? 'bg-[var(--accent-bg)] text-[var(--foreground)]'
                   : 'hover:bg-[var(--secondary-bg)] text-[var(--foreground-secondary)]'
@@ -186,11 +186,11 @@ const WorkoutPlanner = () => {
           muscleActivation={calculateTotalMuscleActivation()} 
         />
         ) : (
-          <div className="grid grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* Left Column - Schedule and Graph */}
-            <div className="col-span-3 space-y-6">
+            <div className="lg:col-span-3 space-y-6">
               {/* Weekly Schedule */}
-              <div className="grid grid-cols-7 gap-4 bg-[var(--secondary-bg)] p-4 rounded-lg">
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-4 bg-[var(--secondary-bg)] p-2 md:p-4 rounded-lg">
                 {Object.entries(weeklyPlan).map(([day, dayExercises]) => (
                   <DragDropWrapper
                     key={day}
@@ -235,7 +235,7 @@ const WorkoutPlanner = () => {
               </div>
 
               {/* Muscle Activation Chart */}
-              <div className="h-96 bg-[var(--card-bg)] p-4 rounded-lg shadow-sm text-[var(--foreground)]">
+              <div className="h-[400px] md:h-96 bg-[var(--card-bg)] p-2 md:p-4 rounded-lg shadow-sm text-[var(--foreground)]">
                 <h2 className="text-xl font-semibold mb-4 text-[var(--foreground)]">Weekly Muscle Activation</h2>
                 <ResponsiveContainer width="100%" height="90%">
                   <BarChart data={calculateTotalMuscleActivation()}>
@@ -259,7 +259,7 @@ const WorkoutPlanner = () => {
             </div>
 
             {/* Right Column - Exercise Library */}
-            <div className="col-span-1 bg-[var(--secondary-bg)] p-4 rounded-lg overflow-y-auto">
+            <div className="lg:col-span-1 bg-[var(--secondary-bg)] p-4 rounded-lg overflow-y-auto max-h-[600px] lg:max-h-none">
               <h2 className="text-xl font-semibold mb-4 sticky top-0 bg-[var(--secondary-bg)] pb-2 text-[var(--foreground)]">Exercise Library</h2>
               <div className="space-y-4">
                 {exerciseData.map((exercise, index) => (

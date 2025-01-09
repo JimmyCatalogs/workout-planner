@@ -11,7 +11,7 @@ const PresetSelect = ({ onSelect, selectedPreset }) => (
   <select
     value={selectedPreset}
     onChange={(e) => onSelect(e.target.value)}
-    className="px-2 py-1 rounded text-sm bg-[var(--background)] text-[var(--foreground)] border border-[var(--border-color)]"
+    className="w-full md:w-auto px-2 py-1 rounded text-sm bg-[var(--background)] text-[var(--foreground)] border border-[var(--border-color)]"
   >
     {Object.keys(PRESETS).map((preset) => (
       <option key={preset} value={preset}>
@@ -90,10 +90,10 @@ const Goals = ({ goals, onGoalChange, muscleActivation }) => {
   };
 
   return (
-    <div className="p-4 bg-[var(--secondary-bg)] rounded-lg space-y-6">
+    <div className="p-2 md:p-4 bg-[var(--secondary-bg)] rounded-lg space-y-6">
       <div>
-        <h2 className="text-xl font-semibold mb-4 text-[var(--foreground)]">Daily Sets Goal</h2>
-        <div className="p-4 bg-[var(--card-bg)] rounded-lg border border-[var(--border-color)]">
+        <h2 className="text-lg md:text-xl font-semibold mb-4 text-[var(--foreground)]">Daily Sets Goal</h2>
+        <div className="p-3 md:p-4 bg-[var(--card-bg)] rounded-lg border border-[var(--border-color)]">
           <label className="block text-sm font-medium text-[var(--foreground)] mb-2">
             Sets per day
           </label>
@@ -104,11 +104,11 @@ const Goals = ({ goals, onGoalChange, muscleActivation }) => {
                 min="0"
                 value={goals.setsPerDay || 0}
                 onChange={(e) => handleSetsPerDayChange(e.target.value)}
-                className="w-24 px-2 py-1 rounded border border-[var(--border-color)] bg-[var(--background)] text-[var(--foreground)]"
+                className="w-20 md:w-24 px-2 py-1 rounded border border-[var(--border-color)] bg-[var(--background)] text-[var(--foreground)]"
               />
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-[var(--foreground-secondary)]">Preset:</span>
+            <div className="flex flex-col md:flex-row md:items-center gap-2">
+              <span className="text-xs md:text-sm text-[var(--foreground-secondary)]">Preset:</span>
               <PresetSelect
                 onSelect={handleSetsPresetSelect}
                 selectedPreset={selectedSetsPreset}
@@ -119,8 +119,8 @@ const Goals = ({ goals, onGoalChange, muscleActivation }) => {
       </div>
 
       <div>
-        <h2 className="text-xl font-semibold mb-4 text-[var(--foreground)]">Weekly Muscle Activation Goals</h2>
-        <div className="grid grid-cols-2 gap-4">
+        <h2 className="text-lg md:text-xl font-semibold mb-4 text-[var(--foreground)]">Weekly Muscle Activation Goals</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {Object.entries({
           Chest: goals.Chest || 0,
           Back: goals.Back || 0,
@@ -139,7 +139,7 @@ const Goals = ({ goals, onGoalChange, muscleActivation }) => {
           return (
             <div 
               key={muscle} 
-              className={`p-4 bg-[var(--card-bg)] rounded-lg ${
+              className={`p-3 md:p-4 bg-[var(--card-bg)] rounded-lg ${
                 isGoalReached ? 'border-2 border-green-500' : 'border border-[var(--border-color)]'
               }`}
             >
@@ -147,20 +147,20 @@ const Goals = ({ goals, onGoalChange, muscleActivation }) => {
                 {muscle}
               </label>
               <div className="space-y-2">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col md:flex-row md:items-center gap-2">
                   <input
                     type="number"
                     min="0"
                     value={goal}
                     onChange={(e) => handleGoalChange(muscle, e.target.value)}
-                    className="w-24 px-2 py-1 rounded border border-[var(--border-color)] bg-[var(--background)] text-[var(--foreground)]"
+                    className="w-20 md:w-24 px-2 py-1 rounded border border-[var(--border-color)] bg-[var(--background)] text-[var(--foreground)]"
                   />
-                  <span className="text-sm text-[var(--foreground)]">
+                  <span className="text-xs md:text-sm text-[var(--foreground)]">
                     Current: {currentActivation}
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-[var(--foreground-secondary)]">Preset:</span>
+                <div className="flex flex-col md:flex-row md:items-center gap-2">
+                  <span className="text-xs md:text-sm text-[var(--foreground-secondary)]">Preset:</span>
                   <PresetSelect
                     onSelect={(preset) => handleMusclePresetSelect(muscle, preset)}
                     selectedPreset={musclePresets[muscle]}
