@@ -23,6 +23,10 @@ const PresetSelect = ({ onSelect, selectedPreset }) => (
 
 const Goals = ({ goals, onGoalChange, muscleActivation }) => {
   const [selectedSetsPreset, setSelectedSetsPreset] = useState('moderate');
+  const [fitnessGoal, setFitnessGoal] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [statusMessage, setStatusMessage] = useState('');
+  const [responseMessage, setResponseMessage] = useState('');
   const [musclePresets, setMusclePresets] = useState({
     Chest: 'moderate',
     Back: 'moderate',
@@ -91,6 +95,90 @@ const Goals = ({ goals, onGoalChange, muscleActivation }) => {
 
   return (
     <div className="p-2 md:p-4 bg-[var(--secondary-bg)] rounded-lg space-y-6">
+      <div className="mb-6">
+        <h2 className="text-lg md:text-xl font-semibold mb-4 text-[var(--foreground)]">Your Fitness Goal</h2>
+        <div className="p-3 md:p-4 bg-[var(--card-bg)] rounded-lg border border-[var(--border-color)]">
+          <textarea
+            value={fitnessGoal}
+            onChange={(e) => setFitnessGoal(e.target.value)}
+            placeholder="I am 44 years old and my objective is to gain 20lbs of muscle mass in 2 years, show me a workout plan"
+            className="w-full px-2 py-1 rounded border border-[var(--border-color)] bg-[var(--background)] text-[var(--foreground)] min-h-[100px]"
+          />
+          <div className="mt-3 flex justify-between items-center">
+            <button
+              onClick={async () => {
+                setIsProcessing(true);
+                setStatusMessage('Processing your request...');
+                
+                try {
+                  // Here we would send the request to Claude with the current goals as context
+                  const response = await fetch('/api/generate-goals', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                      fitnessGoal,
+                      currentGoals: goals
+                    }),
+                  });
+
+                  if (!response.ok) {
+                    throw new Error('Failed to generate goals');
+                  }
+
+                  const newGoals = await response.json();
+                  onGoalChange(newGoals);
+                  setStatusMessage('Goals updated successfully!');
+                  
+                  // Create a formatted message showing the updated values
+                  const updatedValuesMessage = `Based on your input, we have updated your goals to:
+• Sets per day: ${newGoals.setsPerDay}
+• Muscle activation targets:
+  - Chest: ${newGoals.Chest}
+  - Back: ${newGoals.Back}
+  - Shoulders: ${newGoals.Shoulders}
+  - Biceps: ${newGoals.Biceps}
+  - Triceps: ${newGoals.Triceps}
+  - Quadriceps: ${newGoals.Quadriceps}
+  - Hamstrings: ${newGoals.Hamstrings}
+  - Glutes: ${newGoals.Glutes}
+  - Calves: ${newGoals.Calves}
+  - Abs: ${newGoals.Abs}`;
+                  
+                  setResponseMessage(updatedValuesMessage);
+                } catch (error) {
+                  setStatusMessage('Failed to update goals. Please try again.');
+                } finally {
+                  setIsProcessing(false);
+                }
+              }}
+              disabled={isProcessing || !fitnessGoal.trim()}
+              className={`px-4 py-2 rounded ${
+                isProcessing || !fitnessGoal.trim()
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-blue-500 hover:bg-blue-600'
+              } text-white transition-colors`}
+            >
+              {isProcessing ? 'Processing...' : 'Update Goals'}
+            </button>
+            {statusMessage && (
+              <span className={`text-sm ${
+                statusMessage.includes('success') ? 'text-green-500' : 
+                statusMessage.includes('Failed') ? 'text-red-500' : 
+                'text-[var(--foreground)]'
+              }`}>
+                {statusMessage}
+              </span>
+            )}
+          </div>
+          {responseMessage && (
+            <div className="mt-4 p-3 bg-[var(--background)] rounded border border-[var(--border-color)] whitespace-pre-line text-sm">
+              {responseMessage}
+            </div>
+          )}
+        </div>
+      </div>
       <div>
         <h2 className="text-lg md:text-xl font-semibold mb-4 text-[var(--foreground)]">Daily Sets Goal</h2>
         <div className="p-3 md:p-4 bg-[var(--card-bg)] rounded-lg border border-[var(--border-color)]">
