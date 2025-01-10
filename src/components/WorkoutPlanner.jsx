@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { exerciseData } from '../data/exercises.js';
 import Goals from './Goals';
+import { SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
 
 // Theme toggle component
 const ThemeToggle = ({ darkMode, onToggle }) => (
@@ -175,7 +176,19 @@ const WorkoutPlanner = () => {
               Goals
             </button>
           </div>
-          <ThemeToggle darkMode={darkMode} onToggle={toggleDarkMode} />
+          <div className="flex items-center gap-2">
+            <SignedOut>
+              <SignInButton mode="modal">
+                <button className="px-4 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white transition-colors text-sm">
+                  Sign in
+                </button>
+              </SignInButton>
+            </SignedOut>
+            <SignedIn>
+              <UserButton afterSignOutUrl="/" />
+            </SignedIn>
+            <ThemeToggle darkMode={darkMode} onToggle={toggleDarkMode} />
+          </div>
         </div>
       </nav>
       <div className="p-4">
