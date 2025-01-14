@@ -29,3 +29,28 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Drag and drop styles */
+.dragging {
+  transform: rotate(2deg) scale(1.05);
+  opacity: 0.9;
+  cursor: grabbing !important;
+}
+
+/* Smooth transitions for all interactive elements */
+button, 
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Enhanced card interactions */
+[draggable="true"] {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+[draggable="true"]:active {
+  cursor: grabbing;
+}

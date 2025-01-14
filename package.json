@@ -12,6 +12,7 @@
     "@anthropic-ai/sdk": "^0.33.1",
     "@clerk/nextjs": "^6.9.9",
     "@headlessui/react": "^2.2.0",
+    "@hello-pangea/dnd": "^17.0.0",
     "next": "15.1.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

@@ -21,7 +21,7 @@ const PresetSelect = ({ onSelect, selectedPreset }) => (
   </select>
 );
 
-const Goals = ({ goals, onGoalChange, muscleActivation }) => {
+const Goals = ({ goals, onGoalChange, muscleActivation, weeklyPlan }) => {
   const [selectedSetsPreset, setSelectedSetsPreset] = useState('moderate');
   const [fitnessGoal, setFitnessGoal] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -180,28 +180,58 @@ const Goals = ({ goals, onGoalChange, muscleActivation }) => {
         </div>
       </div>
       <div>
-        <h2 className="text-lg md:text-xl font-semibold mb-4 text-[var(--foreground)]">Daily Sets Goal</h2>
-        <div className="p-3 md:p-4 bg-[var(--card-bg)] rounded-lg border border-[var(--border-color)]">
-          <label className="block text-sm font-medium text-[var(--foreground)] mb-2">
-            Sets per day
-          </label>
-          <div className="space-y-2">
-            <div>
-              <input
-                type="number"
-                min="0"
-                value={goals.setsPerDay || 0}
-                onChange={(e) => handleSetsPerDayChange(e.target.value)}
-                className="w-20 md:w-24 px-2 py-1 rounded border border-[var(--border-color)] bg-[var(--background)] text-[var(--foreground)]"
-              />
+        <h2 className="text-lg md:text-xl font-semibold mb-4 text-[var(--foreground)]">Workout Goals</h2>
+        <div className="p-3 md:p-4 bg-[var(--card-bg)] rounded-lg border border-[var(--border-color)] space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-[var(--foreground)] mb-2">
+              Max sets per day
+            </label>
+            <div className="space-y-2">
+              <div>
+                <input
+                  type="number"
+                  min="0"
+                  value={goals.setsPerDay || 0}
+                  onChange={(e) => handleSetsPerDayChange(e.target.value)}
+                  className="w-20 md:w-24 px-2 py-1 rounded border border-[var(--border-color)] bg-[var(--background)] text-[var(--foreground)]"
+                />
+              </div>
+              <div className="flex flex-col md:flex-row md:items-center gap-2">
+                <span className="text-xs md:text-sm text-[var(--foreground-secondary)]">Preset:</span>
+                <PresetSelect
+                  onSelect={handleSetsPresetSelect}
+                  selectedPreset={selectedSetsPreset}
+                />
+              </div>
             </div>
-            <div className="flex flex-col md:flex-row md:items-center gap-2">
-              <span className="text-xs md:text-sm text-[var(--foreground-secondary)]">Preset:</span>
-              <PresetSelect
-                onSelect={handleSetsPresetSelect}
-                selectedPreset={selectedSetsPreset}
-              />
-            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[var(--foreground)] mb-2">
+              Target muscle group frequency (times per week)
+            </label>
+            <input
+              type="number"
+              min="0"
+              max="7"
+              value={goals.muscleFrequency || 2}
+              onChange={(e) => handleGoalChange('muscleFrequency', e.target.value)}
+              className="w-20 md:w-24 px-2 py-1 rounded border border-[var(--border-color)] bg-[var(--background)] text-[var(--foreground)]"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[var(--foreground)] mb-2">
+              Target workout days per week
+            </label>
+            <input
+              type="number"
+              min="0"
+              max="7"
+              value={goals.workoutDays || 0}
+              onChange={(e) => handleGoalChange('workoutDays', e.target.value)}
+              className="w-20 md:w-24 px-2 py-1 rounded border border-[var(--border-color)] bg-[var(--background)] text-[var(--foreground)]"
+            />
           </div>
         </div>
       </div>
@@ -222,18 +252,67 @@ const Goals = ({ goals, onGoalChange, muscleActivation }) => {
           Abs: goals.Abs || 0
         }).map(([muscle, goal]) => {
           const currentActivation = muscleActivation.find(m => m.muscle === muscle)?.activation || 0;
-          const isGoalReached = goal > 0 && currentActivation >= goal;
+          const muscleFrequency = goals.muscleFrequency || 2;
+          const weeklyGoal = goal || 0;
+          const dailyLimit = weeklyGoal / muscleFrequency;
+          
+          // Calculate status
+          let status = 'none';
+          let statusText = '';
+          
+          if (weeklyGoal > 0) {
+            if (currentActivation >= weeklyGoal) {
+              const exceedsLimit = Object.values(weeklyPlan).some(dayExercises => {
+                const dayActivation = dayExercises.reduce((total, exercise) => {
+                  const sets = exercise.sets || 1;
+                  return total + (exercise[muscle] || 0) * sets;
+                }, 0);
+                return dayActivation > dailyLimit;
+              });
+              
+              status = exceedsLimit ? 'warning' : 'success';
+              statusText = exceedsLimit ? 'Daily limit exceeded' : `Target reached (${currentActivation}/${weeklyGoal})`;
+            } else {
+              status = 'error';
+              statusText = `Below target (${currentActivation}/${weeklyGoal})`;
+            }
+          }
           
           return (
             <div 
               key={muscle} 
               className={`p-3 md:p-4 bg-[var(--card-bg)] rounded-lg ${
-                isGoalReached ? 'border-2 border-green-500' : 'border border-[var(--border-color)]'
+                status === 'success' ? 'border-2 border-green-500' :
+                status === 'warning' ? 'border-2 border-yellow-500' :
+                status === 'error' ? 'border-2 border-red-500' :
+                'border border-[var(--border-color)]'
               }`}
             >
-              <label className="block text-sm font-medium text-[var(--foreground)] mb-2">
-                {muscle}
-              </label>
+              <div className="flex justify-between items-start mb-2">
+                <label className="block text-sm font-medium text-[var(--foreground)]">
+                  {muscle}
+                </label>
+                {status !== 'none' && (
+                  <span className={`text-xs ${
+                    status === 'success' ? 'text-green-500' :
+                    status === 'warning' ? 'text-yellow-600' :
+                    'text-red-500'
+                  }`}>
+                    {status === 'success' ? '✓' :
+                     status === 'warning' ? '⚠' :
+                     '✕'}
+                  </span>
+                )}
+              </div>
+              {statusText && (
+                <div className={`text-xs mb-2 ${
+                  status === 'success' ? 'text-green-500' :
+                  status === 'warning' ? 'text-yellow-600' :
+                  'text-red-500'
+                }`}>
+                  {statusText}
+                </div>
+              )}
               <div className="space-y-2">
                 <div className="flex flex-col md:flex-row md:items-center gap-2">
                   <input
