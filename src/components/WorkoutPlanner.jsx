@@ -1,5 +1,6 @@
 'use client';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, Fragment } from 'react';
+import { Dialog, Transition } from '@headlessui/react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { exerciseData } from '../data/exercises.js';
 import Goals from './Goals';
@@ -17,7 +18,73 @@ const ThemeToggle = ({ darkMode, onToggle }) => (
 );
 
 // Client-side only wrapper component for drag and drop
-const DragDropWrapper = ({ children, onDrop, onDragOver, day, exercises, setsPerDay }) => {
+const ExerciseModal = ({ isOpen, onClose, onSelectExercise, exercises }) => {
+  return (
+    <Transition appear show={isOpen} as={Fragment}>
+      <Dialog as="div" className="relative z-50" onClose={onClose}>
+        <Transition.Child
+          as={Fragment}
+          enter="ease-out duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 bg-black bg-opacity-25" />
+        </Transition.Child>
+
+        <div className="fixed inset-0 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-lg bg-[var(--card-bg)] p-6 text-left align-middle shadow-xl transition-all">
+                <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-[var(--foreground)] mb-4">
+                  Select Exercise
+                </Dialog.Title>
+                <div className="mt-2 max-h-[60vh] overflow-y-auto">
+                  {exercises.map((exercise, index) => (
+                    <div
+                      key={index}
+                      onClick={() => {
+                        onSelectExercise(exercise);
+                        onClose();
+                      }}
+                      className="p-3 mb-2 bg-[var(--accent-bg)] rounded-lg cursor-pointer hover:bg-[var(--accent-hover)] transition-colors"
+                    >
+                      <p className="font-medium text-sm mb-2 text-[var(--foreground)]">{exercise.Exercise}</p>
+                      <div className="flex flex-wrap gap-1">
+                        {Object.entries(exercise)
+                          .filter(([key, value]) => key !== 'Exercise' && value > 0)
+                          .map(([muscle, value]) => (
+                            <span 
+                              key={muscle}
+                              className="inline-block px-2 py-1 bg-[var(--card-bg)] rounded text-xs text-[var(--foreground)] font-medium"
+                            >
+                              {muscle}: {value}
+                            </span>
+                          ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Dialog.Panel>
+            </Transition.Child>
+          </div>
+        </div>
+      </Dialog>
+    </Transition>
+  );
+};
+
+const DragDropWrapper = ({ children, onDrop, onDragOver, day, exercises, setsPerDay, onAddExercise }) => {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -47,7 +114,15 @@ const DragDropWrapper = ({ children, onDrop, onDragOver, day, exercises, setsPer
     >
       <div className="flex justify-between items-center p-2 bg-[var(--accent-bg)] border-b border-[var(--border-color)]">
         <h3 className="font-semibold text-[var(--foreground)]">{day}</h3>
-        <span className="text-sm text-[var(--foreground)]">{totalSets} sets</span>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onAddExercise}
+            className="md:hidden px-2 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+          >
+            Add
+          </button>
+          <span className="text-sm text-[var(--foreground)]">{totalSets} sets</span>
+        </div>
       </div>
       <div className="overflow-y-auto h-[248px] md:h-[332px]">
         {children}
@@ -60,6 +135,8 @@ const WorkoutPlanner = () => {
   const [darkMode, setDarkMode] = useState(false);
   const [activeTab, setActiveTab] = useState('planner');
   const [muscleGoals, setMuscleGoals] = useState({});
+  const [selectedDay, setSelectedDay] = useState(null);
+  const [isExerciseModalOpen, setIsExerciseModalOpen] = useState(false);
   const [weeklyPlan, setWeeklyPlan] = useState({
     Monday: [],
     Tuesday: [],
@@ -212,6 +289,10 @@ const WorkoutPlanner = () => {
                     day={day}
                     exercises={dayExercises}
                     setsPerDay={muscleGoals.setsPerDay}
+                    onAddExercise={() => {
+                      setSelectedDay(day);
+                      setIsExerciseModalOpen(true);
+                    }}
                   >
                     <div className="p-2">
                       {dayExercises.map((exercise, index) => (
@@ -271,8 +352,27 @@ const WorkoutPlanner = () => {
               </div>
             </div>
 
+            {/* Exercise Selection Modal */}
+            <ExerciseModal
+              isOpen={isExerciseModalOpen}
+              onClose={() => {
+                setIsExerciseModalOpen(false);
+                setSelectedDay(null);
+              }}
+              onSelectExercise={(exercise) => {
+                if (selectedDay) {
+                  const exerciseWithSets = { ...exercise, sets: 1 };
+                  setWeeklyPlan(prev => ({
+                    ...prev,
+                    [selectedDay]: [...prev[selectedDay], exerciseWithSets]
+                  }));
+                }
+              }}
+              exercises={exerciseData}
+            />
+
             {/* Right Column - Exercise Library */}
-            <div className="lg:col-span-1 bg-[var(--secondary-bg)] p-4 rounded-lg overflow-y-auto max-h-[600px] lg:max-h-none">
+            <div className="hidden lg:block lg:col-span-1 bg-[var(--secondary-bg)] p-4 rounded-lg overflow-y-auto max-h-[600px] lg:max-h-none">
               <h2 className="text-xl font-semibold mb-4 sticky top-0 bg-[var(--secondary-bg)] pb-2 text-[var(--foreground)]">Exercise Library</h2>
               <div className="space-y-4">
                 {exerciseData.map((exercise, index) => (
