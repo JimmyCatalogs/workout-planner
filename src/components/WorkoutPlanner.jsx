@@ -329,13 +329,34 @@ const WorkoutPlanner = () => {
               </div>
 
               {/* Muscle Activation Chart */}
-              <div className="h-[400px] md:h-96 bg-[var(--card-bg)] p-2 md:p-4 rounded-lg shadow-sm text-[var(--foreground)]">
-                <h2 className="text-xl font-semibold mb-4 text-[var(--foreground)]">Weekly Muscle Activation</h2>
+              <div className="h-[500px] md:h-96 bg-[var(--card-bg)] p-2 md:p-6 rounded-lg shadow-sm text-[var(--foreground)]">
+                <h2 className="text-xl font-semibold mb-4 text-[var(--foreground)] px-1 md:px-0">Weekly Muscle Activation</h2>
                 <ResponsiveContainer width="100%" height="90%">
-                  <BarChart data={calculateTotalMuscleActivation()}>
-                    <XAxis dataKey="muscle" angle={-45} textAnchor="end" height={60} />
-                    <YAxis />
-                    <Tooltip />
+                  <BarChart data={calculateTotalMuscleActivation()} margin={{ bottom: 40 }}>
+                    <XAxis 
+                      dataKey="muscle" 
+                      angle={-90} 
+                      textAnchor="end" 
+                      height={80}
+                      tick={{ fontSize: 12 }}
+                      interval={0}
+                    />
+                    <YAxis 
+                      tick={{ fontSize: 12 }} 
+                      width={35}
+                      tickFormatter={(value) => Math.round(value)}
+                    />
+                    <Tooltip 
+                      contentStyle={{
+                        fontSize: '14px',
+                        padding: '8px 12px',
+                        background: 'var(--card-bg)',
+                        border: '1px solid var(--border-color)',
+                        borderRadius: '8px',
+                        color: 'var(--foreground)'
+                      }}
+                      cursor={{ fill: 'var(--accent-bg)' }}
+                    />
                     <Bar 
                       dataKey="activation"
                       fill="#60A5FA"
